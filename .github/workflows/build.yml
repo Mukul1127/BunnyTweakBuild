@@ -2,12 +2,6 @@ name: Build BunnyTweak
 
 on:
   workflow_dispatch:
-    inputs:
-      decrypted_discord_url:
-        description: "The *decrypted* Discord ipa (Provide Direct Download Link)."
-        default: ""
-        required: true
-        type: string
 
 jobs:
   build:
@@ -69,26 +63,11 @@ jobs:
         run: |
           gmake package FINALPACKAGE=1
 
-      - name: Download Orion, IPA, and Pyzule
-        run: |
-          wget "https://github.com/theos/orion/releases/download/1.0.2/Orion_1.0.2.zip" --no-verbose
-          unzip Orion_1.0.2.zip
-
-          wget "${{ github.event.inputs.decrypted_discord_url }}" --no-verbose -O Discord.ipa
-          unzip Discord.ipa
-          echo "discord_version=$(defaults read "$(pwd)/Payload/Discord.app/Info" CFBundleVersion)" >> $GITHUB_ENV
-
-          bash -c "$(curl https://raw.githubusercontent.com/asdfzxcvbn/pyzule/main/install-pyzule.sh)"
-
-      - name: Build IPA
-        run: |
-          pyzule -i Discord.ipa -o Bunny.ipa -f dev.theos.orion14_1.0.2_iphoneos-arm.deb main/packages/*.deb -t
-
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: (${{ env.discord_version }})-(${{ github.run_number }})
-          name: (${{ github.run_number }})
-          files: Bunny.ipa
+          tag_name: ${{ github.run_number }}
+          name: ${{ github.run_number }}
+          files: main/packages/*.deb
