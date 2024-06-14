@@ -1,0 +1,95 @@
+name: Build BunnyTweak
+
+on:
+  workflow_dispatch:
+    inputs:
+      decrypted_discord_url:
+        description: "The *decrypted* Discord ipa (Provide Direct Download Link)."
+        default: ""
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build BunnyTweak
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    env:
+      THEOS: ${{ github.workspace }}/theos
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: pyoncord/BunnyTweak
+          path: main
+          submodules: recursive
+    
+      - name: Install Dependencies
+        run: brew install ldid make
+
+      - name: Check cache
+        run: |
+          echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1` >> $GITHUB_ENV
+    
+      - name: Restore cache if available
+        id: cache
+        uses: actions/cache/restore@v4.0.2
+        with:
+          path: ${{ github.workspace }}/theos
+          key: ${{ env.upstream_heads }}
+
+      - name: Setup Theos
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: theos/theos
+          path: theos
+          submodules: recursive
+
+      - name: Setup iOS SDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: theos/sdks
+          path: theos/sdks
+          sparse-checkout: "iPhoneOS16.5.sdk"
+          sparse-checkout-cone-mode: false
+
+      - name: Save cache if available
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4.0.2
+        with:
+          path: ${{ github.workspace }}/theos
+          key: ${{ env.upstream_heads }}
+
+      - name: Build Debs
+        working-directory: main
+        run: |
+          gmake package FINALPACKAGE=1
+          gmake package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+
+      - name: Download Orion, IPA, and Pyzule
+        run: |
+          wget "https://github.com/theos/orion/releases/download/1.0.2/Orion_1.0.2.zip" --no-verbose
+          unzip Orion_1.0.2.zip
+
+          wget "${{ github.event.inputs.decrypted_discord_url }}" --no-verbose -O Discord.ipa
+          unzip Discord.ipa
+          echo "discord_version=$(defaults read "$(pwd)/Payload/Discord.app/Info" CFBundleVersion)" >> $GITHUB_ENV
+
+          bash -c "$(curl https://raw.githubusercontent.com/asdfzxcvbn/pyzule/main/install-pyzule.sh)"
+
+      - name: Build IPA
+        run: |
+          pyzule -i Discord.ipa -o Bunny.ipa -f dev.theos.orion14_1.0.2_iphoneos-arm.deb main/packages/*-arm.deb -t
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.0.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: (${{ env.discord_version }})-(${{ github.run_number }})
+          name: (${{ github.run_number }})
+          files: Bunny.ipa
