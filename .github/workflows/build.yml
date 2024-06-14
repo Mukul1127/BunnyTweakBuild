@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     name: Build BunnyTweak
-    runs-on: macos-latest
+    runs-on: macos-12
     env:
       THEOS: ${{ github.workspace }}/theos
 
