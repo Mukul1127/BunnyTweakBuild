@@ -58,7 +58,7 @@ jobs:
       - name: Build Debs
         working-directory: main
         run: |
-          sed -i "" "s|iphone:clang:latest:15.0|iphone:clang:16.5:15.0|g" Makefile
+          sed -i "" "s|iphone:clang:latest:12.2|iphone:clang:16.5:14.0|g" Makefile
           gmake package FINALPACKAGE=1
 
       - name: Create Release
