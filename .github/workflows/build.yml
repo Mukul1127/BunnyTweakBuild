@@ -7,8 +7,6 @@ jobs:
   build:
     name: Build BunnyTweak
     runs-on: macos-latest
-    permissions:
-      contents: write
     env:
       THEOS: ${{ github.workspace }}/theos
 
@@ -18,7 +16,6 @@ jobs:
         with:
           repository: pyoncord/BunnyTweak
           path: main
-          submodules: recursive
     
       - name: Install Dependencies
         run: brew install ldid make
@@ -61,6 +58,7 @@ jobs:
       - name: Build Debs
         working-directory: main
         run: |
+          sed -i "" "s|iphone:clang:latest:15.0|iphone:clang:16.5:15.0|g" Makefile
           gmake package FINALPACKAGE=1
 
       - name: Create Release
