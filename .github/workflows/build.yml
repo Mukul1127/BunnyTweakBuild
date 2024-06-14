@@ -21,7 +21,7 @@ jobs:
           submodules: recursive
     
       - name: Install Dependencies
-        run: brew install ldid make
+        run: brew install ldid
 
       - name: Check cache
         run: |
@@ -61,7 +61,7 @@ jobs:
       - name: Build Debs
         working-directory: main
         run: |
-          gmake package FINALPACKAGE=1
+          make package FINALPACKAGE=1
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.5
