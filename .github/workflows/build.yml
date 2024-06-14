@@ -68,7 +68,6 @@ jobs:
         working-directory: main
         run: |
           gmake package FINALPACKAGE=1
-          gmake package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Download Orion, IPA, and Pyzule
         run: |
@@ -83,7 +82,7 @@ jobs:
 
       - name: Build IPA
         run: |
-          pyzule -i Discord.ipa -o Bunny.ipa -f dev.theos.orion14_1.0.2_iphoneos-arm.deb main/packages/*-arm.deb -t
+          pyzule -i Discord.ipa -o Bunny.ipa -f dev.theos.orion14_1.0.2_iphoneos-arm.deb main/packages/*.deb -t
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.5
