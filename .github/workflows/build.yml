@@ -61,6 +61,7 @@ jobs:
         working-directory: main
         run: |
           gmake package FINALPACKAGE=1
+          gmake package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.6
