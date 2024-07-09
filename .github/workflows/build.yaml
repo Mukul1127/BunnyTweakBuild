@@ -36,20 +36,7 @@ jobs:
 
       - name: ⚙️ Setup Theos
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-        with:
-          repository: theos/theos
-          path: theos
-          submodules: recursive
-
-      - name: ⚙️ Setup iOS SDK
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-        with:
-          repository: theos/sdks
-          path: theos/sdks
-          sparse-checkout: "iPhoneOS16.5.sdk"
-          sparse-checkout-cone-mode: false
+        run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
 
       - name: ♻️ Save cache if needed
         if: steps.cache.outputs.cache-hit != 'true'
