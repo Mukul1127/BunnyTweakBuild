@@ -51,6 +51,16 @@ jobs:
           sparse-checkout: "iPhoneOS16.5.sdk"
           sparse-checkout-cone-mode: false
 
+      - name: ⚙️ Setup iOS Swift Toolchain
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: theos
+        run: |
+          mkdir toolchain
+          cd toolchain
+
+          curl https://github.com/kabiroberai/swift-toolchain-linux/releases/download/v2.3.0/swift-5.8-ubuntu22.04.tar.xz -o swift.tar.xz
+          tar -xf ./swift.tar.xz
+          
       - name: ♻️ Save cache if needed
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
