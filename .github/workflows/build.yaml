@@ -24,9 +24,39 @@ jobs:
           repository: pyoncord/BunnyTweak
           path: main
 
+      - name: 🔍 Check cache
+        run: echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1` >> $GITHUB_ENV
+
+      - name: ♻️ Restore cache if available
+        id: cache
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: ${{ github.workspace }}/theos
+          key: ${{ env.upstream_heads }}
+
       - name: ⚙️ Setup Theos
         if: steps.cache.outputs.cache-hit != 'true'
-        run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          repository: theos/theos
+          path: theos
+          submodules: recursive
+
+      - name: ⚙️ Setup iOS SDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          repository: theos/sdks
+          path: theos/sdks
+          sparse-checkout: "iPhoneOS16.5.sdk"
+          sparse-checkout-cone-mode: false
+
+      - name: ♻️ Save cache if needed
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: ${{ github.workspace }}/theos
+          key: ${{ env.upstream_heads }}
 
       - name: 📦 Build DEBs
         working-directory: main
