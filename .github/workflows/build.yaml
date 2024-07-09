@@ -24,9 +24,6 @@ jobs:
           repository: pyoncord/BunnyTweak
           path: main
 
-      - name: 🔍 Check cache
-        run: echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1` >> $GITHUB_ENV
-
       - name: ⚙️ Setup Theos
         if: steps.cache.outputs.cache-hit != 'true'
         run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
