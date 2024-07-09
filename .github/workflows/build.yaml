@@ -53,10 +53,7 @@ jobs:
 
       - name: ⚙️ Setup iOS Swift Toolchain
         if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir $THEOS/toolchain/
-          curl https://github.com/kabiroberai/swift-toolchain-linux/releases/download/v2.3.0/swift-5.8-ubuntu22.04.tar.xz -o swift.tar.xz
-          tar -xf ./swift.tar.xz -C $THEOS/toolchain/
+        run: curl https://github.com/kabiroberai/swift-toolchain-linux/releases/download/v2.3.0/swift-5.8-ubuntu22.04.tar.xz | tar -xC $THEOS/toolchain/
           
       - name: ♻️ Save cache if needed
         if: steps.cache.outputs.cache-hit != 'true'
