@@ -34,8 +34,8 @@ jobs:
       - name: 📦 Build DEBs
         working-directory: main
         run: |
-          gmake package FINALPACKAGE=1
-          gmake package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+          make package FINALPACKAGE=1
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: 🚀 Publish Release
         uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
