@@ -36,7 +36,7 @@ jobs:
           path: main
 
       - name: 🔍 Check cache
-        run: echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1` >> $GITHUB_ENV
+        run: echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1`-`git ls-remote https://github.com/kabiroberai/swift-toolchain-linux | head -n 1 | cut -f 1` >> $GITHUB_ENV
 
       - name: ♻️ Restore cache if available
         id: cache
