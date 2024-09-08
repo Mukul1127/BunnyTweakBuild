@@ -1,4 +1,4 @@
-name: Build BunnyTweak
+name: BunnyTweak CI
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: 🛡️ Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
         with:
           disable-sudo: true
           egress-policy: block
@@ -36,14 +36,15 @@ jobs:
           path: main
 
       - name: 🔍 Check cache
-        run: echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1`-`git ls-remote https://github.com/kabiroberai/swift-toolchain-linux | head -n 1 | cut -f 1` >> $GITHUB_ENV
+        run: |
+          echo UPSTREAM_HEADS=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1`-`git ls-remote https://github.com/kabiroberai/swift-toolchain-linux | head -n 1 | cut -f 1` >> $GITHUB_ENV
 
       - name: ♻️ Restore cache if available
         id: cache
         uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ${{ github.workspace }}/theos
-          key: ${{ env.upstream_heads }}
+          key: ${{ env.UPSTREAM_HEADS }}
 
       - name: ⚙️ Setup Theos
         if: steps.cache.outputs.cache-hit != 'true'
@@ -62,25 +63,20 @@ jobs:
           sparse-checkout: "iPhoneOS16.5.sdk"
           sparse-checkout-cone-mode: false
 
-      - name: ⚙️ Setup iOS Swift Toolchain
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: wget -qO- https://github.com/kabiroberai/swift-toolchain-linux/releases/download/v2.3.0/swift-5.8-ubuntu22.04.tar.xz | tar -xJC $THEOS/toolchain/
-          
       - name: ♻️ Save cache if needed
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ${{ github.workspace }}/theos
-          key: ${{ env.upstream_heads }}
+          key: ${{ env.UPSTREAM_HEADS }}
 
       - name: 📦 Build DEBs
         working-directory: main
         run: |
-          make package FINALPACKAGE=1
           make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: 🚀 Publish Release
-        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
+        uses: softprops/action-gh-release@9a28f2423fd7ba2781181bb13e8aba228027c4e9 # v2.0.8 + 4 Package Bumps
         with:
           tag_name: bunny-${{ github.run_number }}
           name: BunnyTweak (${{ github.run_number }})
